@@ -1,51 +1,35 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
-import { randText } from '@ngneat/falso';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ErrorComponent } from './components/error.component';
+import { SpinnerComponent } from './components/spinner.component';
+import { ToDoComponent } from './components/todo.conponent';
+import { ToDo } from './models/todo.model';
+import { ToDoService } from './services/todo.service';
 
 @Component({
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ErrorComponent, ToDoComponent, SpinnerComponent],
   selector: 'app-root',
   template: `
-    <div *ngFor="let todo of todos">
-      {{ todo.title }}
-      <button (click)="update(todo)">Update</button>
-    </div>
+    <ng-container *ngIf="todos$ | async as todos; else spinner">
+      <div *ngFor="let todo of todos; trackBy: trackByTitle">
+        <app-todo [todo]="todo"></app-todo>
+      </div>
+    </ng-container>
+    <ng-template #spinner>
+      <app-spinner></app-spinner>
+    </ng-template>
+    <app-error></app-error>
   `,
-  styles: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit {
-  todos!: any[];
+export class AppComponent {
+  todos$ = this.todoService.todos$;
 
-  constructor(private http: HttpClient) {}
+  constructor(private todoService: ToDoService) {}
 
-  ngOnInit(): void {
-    this.http
-      .get<any[]>('https://jsonplaceholder.typicode.com/todos')
-      .subscribe((todos) => {
-        this.todos = todos;
-      });
-  }
-
-  update(todo: any) {
-    this.http
-      .put<any>(
-        `https://jsonplaceholder.typicode.com/todos/${todo.id}`,
-        JSON.stringify({
-          todo: todo.id,
-          title: randText(),
-          body: todo.body,
-          userId: todo.userId,
-        }),
-        {
-          headers: {
-            'Content-type': 'application/json; charset=UTF-8',
-          },
-        },
-      )
-      .subscribe((todoUpdated: any) => {
-        this.todos[todoUpdated.id - 1] = todoUpdated;
-      });
+  trackByTitle(index: number, todo: ToDo) {
+    // setInterval(()=> {console.log}, 1000)
+    return todo.title;
   }
 }
