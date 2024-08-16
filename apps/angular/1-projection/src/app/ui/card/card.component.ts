@@ -1,7 +1,7 @@
 import {
   Component,
   EventEmitter,
-  Input,
+  input,
   Output,
   TemplateRef,
 } from '@angular/core';
@@ -17,9 +17,9 @@ import { ListItemComponent } from '../list-item/list-item.component';
     <ng-content selector="img"></ng-content>
 
     <section>
-      <ng-container *ngFor="let item of items; trackBy: itemTrackBy">
+      <ng-container *ngFor="let item of items(); trackBy: itemTrackBy">
         <ng-template
-          [ngTemplateOutlet]="template"
+          [ngTemplateOutlet]="template()"
           [ngTemplateOutletContext]="{ $implicit: item }"></ng-template>
       </ng-container>
     </section>
@@ -37,8 +37,9 @@ import { ListItemComponent } from '../list-item/list-item.component';
   imports: [ListItemComponent, NgFor, NgTemplateOutlet],
 })
 export class CardComponent {
-  @Input() items!: { id: number }[] | null;
-  @Input() template!: TemplateRef<any>;
+  items = input.required<{ id: number }[] | null>();
+  template = input.required<TemplateRef<any>>();
+
   @Output() add = new EventEmitter();
 
   itemTrackBy(index: number, item: { id: number }) {
