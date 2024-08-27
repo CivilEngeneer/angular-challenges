@@ -1,12 +1,11 @@
 import {
   Component,
+  ContentChild,
   EventEmitter,
   input,
   Output,
   TemplateRef,
 } from '@angular/core';
-// import { randStudent, randTeacher } from '../../data-access/fake-http.service';
-// import { StudentStore } from '../../data-access/student.store';
 
 import { NgFor, NgTemplateOutlet } from '@angular/common';
 import { ListItemComponent } from '../list-item/list-item.component';
@@ -19,7 +18,7 @@ import { ListItemComponent } from '../list-item/list-item.component';
     <section>
       <ng-container *ngFor="let item of items(); trackBy: itemTrackBy">
         <ng-template
-          [ngTemplateOutlet]="template()"
+          [ngTemplateOutlet]="template"
           [ngTemplateOutletContext]="{ $implicit: item }"></ng-template>
       </ng-container>
     </section>
@@ -38,7 +37,8 @@ import { ListItemComponent } from '../list-item/list-item.component';
 })
 export class CardComponent {
   items = input.required<{ id: number }[] | null>();
-  template = input.required<TemplateRef<any>>();
+
+  @ContentChild('temp', { read: TemplateRef }) template!: TemplateRef<any>;
 
   @Output() add = new EventEmitter();
 

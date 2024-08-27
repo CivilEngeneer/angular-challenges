@@ -8,11 +8,7 @@ import { ListItemComponent } from '../../ui/list-item/list-item.component';
 @Component({
   selector: 'app-teacher-card',
   template: `
-    <app-card
-      class="bg-light-red"
-      [items]="teachers$ | async"
-      [template]="temp"
-      (add)="add()">
+    <app-card class="bg-light-red" [items]="teachers$ | async" (add)="add()">
       <img src="assets/img/teacher.png" width="200px" />
 
       <ng-template #temp let-item>
