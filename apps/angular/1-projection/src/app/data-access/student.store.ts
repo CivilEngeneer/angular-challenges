@@ -1,23 +1,29 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { computed, Injectable, signal } from '@angular/core';
 import { Student } from '../model/student.model';
+import { FakeHttpService } from './fake-http.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StudentStore {
-  private students = new BehaviorSubject<Student[]>([]);
-  students$ = this.students.asObservable();
+  private _students = signal<Student[]>([]);
+  readonly students = computed(() => this._students());
+
+  constructor(private http: FakeHttpService) {
+    this.http.fetchStudents$.subscribe((students) => {
+      this._students.set(students);
+    });
+  }
 
   addAll(students: Student[]) {
-    this.students.next(students);
+    this._students.update((s) => [...s, ...students]);
   }
 
   addOne(student: Student) {
-    this.students.next([...this.students.value, student]);
+    this._students.update((s) => [...s, student]);
   }
 
   deleteOne(id: number) {
-    this.students.next(this.students.value.filter((s) => s.id !== id));
+    this._students.update((s) => s.filter((x) => x.id !== id));
   }
 }

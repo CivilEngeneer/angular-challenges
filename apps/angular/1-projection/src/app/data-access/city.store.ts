@@ -1,23 +1,29 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { computed, Injectable, signal } from '@angular/core';
 import { City } from '../model/city.model';
+import { FakeHttpService } from './fake-http.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CityStore {
-  private cities = new BehaviorSubject<City[]>([]);
-  cities$ = this.cities.asObservable();
+  private _cities = signal<City[]>([]);
+  readonly cities = computed(() => this._cities());
 
-  addAll(cities: City[]) {
-    this.cities.next(cities);
+  constructor(private http: FakeHttpService) {
+    this.http.fetchCities$.subscribe((cities) => {
+      this._cities.set(cities);
+    });
   }
 
-  addOne(student: City) {
-    this.cities.next([...this.cities.value, student]);
+  addAll(cities: City[]) {
+    this._cities.update((c) => [...c, ...cities]);
+  }
+
+  addOne(city: City) {
+    this._cities.update((c) => [...c, city]);
   }
 
   deleteOne(id: number) {
-    this.cities.next(this.cities.value.filter((s) => s.id !== id));
+    this._cities.update((c) => c.filter((x) => x.id !== id));
   }
 }
